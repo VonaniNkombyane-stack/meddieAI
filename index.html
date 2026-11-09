@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Meddy AI - Digital Health Companion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --brand-theme: #008a9a;
+            --brand-gradient: linear-gradient(135deg, #00BCD4 0%, #008A9A 100%);
+            --recomed-theme: #00c897;
+            --surface-glass: rgba(255, 255, 255, 0.95);
+            --surface-border: rgba(226, 232, 240, 0.8);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --shadow-glow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body {
+            background: #f8fafc;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 16px;
+        }
+
+        .workspace-grid {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .app-shell {
+            width: 100%;
+            max-width: 420px;
+            min-height: 880px;
+            max-height: 96vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 36px;
+            border: 1px solid var(--surface-border);
+            box-shadow: var(--shadow-glow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .app-header {
+            padding: 14px 18px 10px;
+            background: rgba(255, 255, 255, 0.98);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .brand-pill { display: flex; align-items: center; gap: 10px; }
+        .brand-logo {
+            width: 36px; height: 36px;
+            background: var(--brand-gradient);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 800; font-size: 16px;
+        }
+
+        .brand-title { font-size: 13.5px; font-weight: 800; color: var(--text-primary); }
+        .brand-subtitle { font-size: 10px; font-weight: 700; color: var(--brand-theme); text-transform: uppercase; }
+
+        .ai-pill-tag {
+            background: #e0f2fe; color: #0369a1; padding: 4px 10px;
+            border-radius: 20px; font-size: 10px; font-weight: 800;
+        }
+
+        .segment-bar {
+            padding: 8px 16px; background: rgba(241, 245, 249, 0.9);
+            display: flex; gap: 8px; border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+        }
+
+        .segment-btn {
+            flex: 1; padding: 9px 6px; border: none; background: transparent;
+            border-radius: 12px; font-size: 12px; font-weight: 800;
+            color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease;
+        }
+
+        .segment-btn.active { background: #ffffff; color: var(--brand-theme); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+        .main-stage {
+            flex: 1; padding: 14px 18px; overflow-y: auto;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .character-viewport { margin: 2px 0 8px; position: relative; display: flex; flex-direction: column; align-items: center; }
+        .character-svg {
+            width: 75px; height: 75px;
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.12));
+            animation: characterFloat 3.5s ease-in-out infinite;
+        }
+
+        @keyframes characterFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+        .eye-blink { animation: blinkEyes 4s infinite; transform-origin: center; }
+        @keyframes blinkEyes { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(0.1); } }
+
+        .audio-speak-btn {
+            display: inline-flex; align-items: center; gap: 6px; margin-top: 6px;
+            padding: 6px 14px; background: #ffffff; border: 1px solid var(--brand-theme);
+            color: var(--brand-theme); border-radius: 20px; font-size: 11px; font-weight: 700;
+            cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.05); transition: all 0.2s ease;
+        }
+        .audio-speak-btn:hover { background: var(--brand-theme); color: #ffffff; }
+        .audio-speak-btn.speaking {
+            background: #ef4444; color: #ffffff; border-color: #ef4444; animation: pulseGlow 1.5s infinite;
+        }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .feature-nav-scroll {
+            width: 100%; 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+            padding: 8px 2px 12px 2px; 
+            margin-bottom: 8px; 
+            justify-content: flex-start;
+        }
+
+        .feature-nav-btn {
+            padding: 8px 14px; 
+            border-radius: 16px;
+            background: #ffffff; 
+            border: 1px solid #cbd5e1; 
+            font-size: 11.5px;
+            font-weight: 700; 
+            color: var(--text-secondary); 
+            cursor: pointer; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 36px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.04); 
+            transition: all 0.2s ease;
+        }
+
+        .feature-nav-btn.active { 
+            background: var(--brand-theme); color: white; border-color: var(--brand-theme); 
+            box-shadow: 0 4px 10px rgba(0, 138, 154, 0.25);
+        }
+
+        .feature-nav-btn.recomed-tab { border-color: #00c897; color: #00a87e; background: #f0fdf4; }
+        .feature-nav-btn.recomed-tab.active { background: #00c897; color: #ffffff; }
+
+        .speech-card {
+            width: 100%; background: var(--surface-glass); border: 1px solid var(--surface-border);
+            border-radius: 18px; padding: 12px 14px; box-shadow: 0 6px 16px rgba(0,0,0,0.03);
+            margin-bottom: 10px; text-align: left;
+        }
+
+        .speech-text { font-size: 12.5px; line-height: 1.5; color: var(--text-primary); }
+
+        .info-card {
+            width: 100%; background: #ffffff; border: 1px solid #e2e8f0;
+            border-radius: 18px; padding: 12px 14px; margin-bottom: 10px; text-align: left;
+        }
+
+        .info-card-title {
+            font-size: 10px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 6px;
+        }
+
+        /* VISUAL INSTRUCTION DRAWINGS / ICON CARDS */
+        .poster-container {
+            width: 100%; background: #ffffff; border: 2px solid #e2e8f0;
+            border-radius: 18px; padding: 14px; margin-top: 6px;
+        }
+        .poster-header {
+            text-align: center; font-size: 12px; font-weight: 800; color: #0f172a;
+            text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 8px;
+            margin-bottom: 12px; border-bottom: 2px dashed #cbd5e1;
+        }
+        .visual-section-title {
+            font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 6px;
+            margin-bottom: 10px; padding: 4px 8px; border-radius: 8px;
+        }
+        .title-dos-bg { background: #dcfce7; color: #15803d; }
+        .title-donts-bg { background: #fee2e2; color: #b91c1c; }
+
+        .visual-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;
+        }
+        .visual-card {
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px;
+            padding: 10px; text-align: center; display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-start; gap: 6px;
+        }
+        .card-do { border-top: 3px solid #16a34a; }
+        .card-dont { border-top: 3px solid #dc2626; }
+
+        .visual-icon-badge {
+            width: 38px; height: 38px; border-radius: 12px; display: flex;
+            align-items: center; justify-content: center; font-size: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+        .icon-badge-do { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .icon-badge-dont { background: #fef2f2; border: 1px solid #fecaca; }
+
+        .visual-card-text {
+            font-size: 10.5px; font-weight: 700; color: #1e293b; line-height: 1.3;
+        }
+
+        .pil-link-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            width: 100%; margin-top: 10px; padding: 8px 12px; background: #f1f5f9;
+            border: 1px solid #cbd5e1; border-radius: 10px; font-size: 11px;
+            font-weight: 700; color: #0f172a; text-decoration: none; transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .pil-link-btn:hover { background: var(--brand-theme); color: #ffffff; border-color: var(--brand-theme); }
+
+        .recomed-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; margin-top: 10px; padding: 10px 14px; background: var(--recomed-theme);
+            color: #ffffff; border-radius: 12px; font-size: 12px; font-weight: 800;
+            text-decoration: none; box-shadow: 0 4px 12px rgba(0, 200, 151, 0.25);
+        }
+
+        .recomed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+        .recomed-chip {
+            background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px;
+            padding: 8px 4px; text-align: center; font-size: 10px; font-weight: 700;
+            color: #0f172a; text-decoration: none; display: flex; flex-direction: column;
+            align-items: center; gap: 4px;
+        }
+
+        .dose-calc-box {
+            background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px;
+            padding: 10px; margin-top: 6px; display: flex; flex-direction: column; gap: 6px;
+        }
+        .dose-select {
+            padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1;
+            font-size: 11.5px; font-weight: 600; outline: none; background: white;
+        }
+        .dose-result {
+            font-size: 11.5px; font-weight: 700; color: #008a9a; background: #e0f2fe;
+            padding: 8px; border-radius: 8px; text-align: center;
+        }
+
+        .video-container {
+            width: 100%; position: relative; padding-bottom: 56.25%; height: 0;
+            overflow: hidden; border-radius: 16px; border: 2px solid #38bdf8;
+            margin-top: 8px; background: #000;
+        }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+
+        .child-badge {
+            background: #fef08a; color: #854d0e; padding: 5px 10px; border-radius: 20px;
+            font-size: 10.5px; font-weight: 800; text-align: center; margin-bottom: 6px; display: inline-block;
+        }
+
+        .disclaimer-banner {
+            font-size: 10px; color: #64748b; background: #f1f5f9; border-radius: 10px;
+            padding: 6px 10px; margin-top: 4px; text-align: center; border: 1px dashed #cbd5e1;
+        }
+
+        .app-footer {
+            padding: 10px 14px; background: rgba(255, 255, 255, 0.95);
+            border-top: 1px solid rgba(226, 232, 240, 0.8); display: flex; gap: 8px; align-items: center;
+        }
+        
+        .survey-btn-row {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .survey-btn {
+            background: #ffffff;
+            border: 1.5px solid var(--brand-theme);
+            color: var(--brand-theme);
+            padding: 7px 18px;
+            border-radius: 18px;
+            font-size: 11.5px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            margin-top: 2px;
+        }
+
+        .survey-btn:hover {
+            background: var(--brand-theme);
+            color: #ffffff;
+        }
+        .lang-select {
+            background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 14px;
+            padding: 8px 6px; font-size: 11px; font-weight: 700; color: var(--text-primary); outline: none;
+        }
+
+        .chat-input {
+            flex: 1; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 20px;
+            padding: 8px 12px; font-size: 12px; outline: none;
+        }
+
+        .send-btn {
+            background: var(--brand-gradient); border: none; color: white;
+            width: 34px; height: 34px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+        }
+
+        .packaging-simulator {
+            width: 100%; max-width: 420px; background: #ffffff;
+            border: 1px solid #e2e8f0; border-radius: 24px; padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); display: flex;
+            flex-direction: column; gap: 12px;
+        }
+
+        .pack-title { font-size: 14px; font-weight: 800; color: #0f172a; }
+        .pack-desc { font-size: 11.5px; color: #64748b; line-height: 1.4; }
+
+        .host-url-input {
+            width: 100%; padding: 8px 10px; border-radius: 8px;
+            border: 1px solid #cbd5e1; font-size: 11px; outline: none;
+        }
+
+        .qr-display-card {
+            background: #f8fafc; border: 2px dashed #cbd5e1;
+            border-radius: 16px; padding: 14px; text-align: center;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+        }
+
+        .qr-image { width: 140px; height: 140px; border-radius: 8px; }
+
+        .switch-product-btn {
+            width: 100%; padding: 9px 12px; border-radius: 12px; border: 1px solid #cbd5e1;
+            background: #ffffff; font-size: 11.5px; font-weight: 700; color: #1e293b;
+            cursor: pointer; transition: all 0.2s ease; display: flex; justify-content: space-between; align-items: center;
+        }
+        .switch-product-btn:hover { border-color: var(--brand-theme); background: #f8fafc; }
+    </style>
+</head>
+<body>
+
+<div class="workspace-grid">
+    <div class="app-shell">
+        <div class="app-header">
+            <div class="brand-pill">
+                <div class="brand-logo">M</div>
+                <div>
+                    <div class="brand-title" id="brandTitle">Panado® Paediatric Strawberry</div>
+                    <div class="brand-subtitle" id="medTagDisplay">Adcock Ingram Companion</div>
+                </div>
+            </div>
+            <div class="ai-pill-tag">PIL VERIFIED</div>
+        </div>
+
+        <div class="segment-bar">
+            <button class="segment-btn active" id="segCaregiver" onclick="setSegment('caregiver')">👨‍👩‍👧 Caregiver View</button>
+            <button class="segment-btn" id="segChild" onclick="setSegment('child')">💡 Information Zone</button>
+        </div>
+
+        <div class="main-stage">
+            <div class="character-viewport">
+                <svg class="character-svg" viewBox="0 0 120 120" fill="none">
+                    <path id="pillCap" d="M60 10C37.9 10 20 27.9 20 50V60H100V50C100 27.9 82.1 10 60 10Z" fill="#00BCD4"/>
+                    <path d="M20 60V70C20 92.1 37.9 110 60 110C82.1 110 100 92.1 100 70V60H20Z" fill="#F1F5F9"/>
+                    <rect id="pillBand" x="20" y="57" width="80" height="6" fill="#008A9A"/>
+                    <g class="eye-blink">
+                        <circle cx="46" cy="42" r="5" fill="#1E293B"/>
+                        <circle cx="74" cy="42" r="5" fill="#1E293B"/>
+                        <circle cx="48" cy="40" r="1.8" fill="white"/>
+                        <circle cx="76" cy="40" r="1.8" fill="white"/>
+                    </g>
+                    <path d="M50 49C50 49 55 54 60 54C65 54 70 49 70 49" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <button class="audio-speak-btn" id="audioBtn" onclick="toggleAudioSpeech()">
+                    <span id="audioBtnIcon">🔊</span> <span id="audioBtnText">Listen to Meddy</span>
+                </button>
+            </div>
+
+            <div id="navigationTabs" class="feature-nav-scroll"></div>
+            <div class="speech-card"><div class="speech-text" id="speechText"></div></div>
+            <div class="info-card" id="infoCard"></div>
+
+            <div class="disclaimer-banner" id="disclaimerBanner">
+                ℹ️ Meddy complements SAHPRA approved Patient Information Leaflets. For severe symptoms, easily transition to RecoMed to consult a doctor.
+            </div>
+        </div>
+
+        <div class="app-footer" id="appFooter">
+            <select class="lang-select" id="langSelect" onchange="onLanguageChange()">
+                <option value="en">🇬🇧 English</option>
+                <option value="zu">🇿🇦 isiZulu</option>
+                <option value="af">🇿🇦 Afrikaans</option>
+            </select>
+            <input type="text" class="chat-input" id="chatInput" placeholder="Ask Meddy or type symptoms..." onkeypress="handleKey(event)">
+            <button class="send-btn" onclick="askMeddy()">➤</button>
+      </div>
+            <div class="survey-btn-row">
+           <a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=CgyGsNAA3k-DcOXF2rr0NZ9KfyT7F0BBoDSZGbGELlFURU1OR0ZDNEFCMEw1S0laRTg5RjJZRzZPRi4u&origin=Invitation&channel=1" target="_blank" rel="noopener" class="survey-btn" id="surveyBtn">📋 Survey</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const uiTranslations = {
+        en: {
+            caregiverBtn: "👨‍👩‍👧 Caregiver View",
+            infoZoneBtn: "💡 Information Zone",
+            listenMeddy: "Listen to Meddy",
+            stopMeddy: "Stop Meddy Talking",
+            chatPlaceholder: "Ask Meddy or type symptoms...",
+            disclaimer: "ℹ️ Meddy complements SAHPRA approved Patient Information Leaflets. For severe symptoms, easily transition to RecoMed to consult a doctor.",
+            recomedTitle: "🏥 Need Clinical Care? (RecoMed Integration)",
+            recomedDesc: "If symptoms persist, worsen, or require immediate medical evaluation, book an online or in-person consultation with a nearby healthcare provider.",
+            recomedFindBtn: "🔍 Find Nearby Doctors on RecoMed ›",
+            pilLink: "📄 SAHPRA Approved Patient Information Leaflet (PDF)",
+            dosePrompt: "-- Choose Child Age Bracket --",
+            doseOpt1: "3 months to 1 year (2,5 mL - 5 mL)",
+            doseOpt2: "1 to 5 years (5 mL - 10 mL)",
+            doseOpt3: "6 to 12 years (10 mL - 20 mL)",
+            doseDefaultRes: "Select age bracket to view approved dose",
+            doseResPrefix: "Approved Dose: Give ",
+            doseResSuffix: " orally every 4 hours as needed (Max 4 doses in 24 hours). Do not exceed 5 days.",
+            
+            allergexDosePrompt: "-- Choose Child/Adult Age Bracket --",
+            allergexOpt1: "2 to 12 years (Weight under 30 kg): 5 mL once daily",
+            allergexOpt2: "2 to 12 years (Weight over 30 kg): 10 mL once daily",
+            allergexOpt3: "Adults & Children 12+ years: 10 mL once daily",
+
+            triageMsg: "🚨 <strong>Medical Attention Recommended:</strong> If symptoms are severe or persistent beyond the recommended PIL days, consult a medical professional immediately via <strong>RecoMed</strong> below:",
+            defaultBotMsg: "🤖 Meddy verified <b>{product}</b> PIL guidance regarding \"{query}\". Always consult your doctor or pharmacist."
+        },
+        zu: {
+            caregiverBtn: "👨‍👩‍👧 Buka Umhlokomeli",
+            infoZoneBtn: "💡 Indawo Yolwazi",
+            listenMeddy: "Lalela u-Meddy",
+            stopMeddy: "Misa u-Meddy Ukukhuluma",
+            chatPlaceholder: "Buza u-Meddy noma ubhale izimpawu...",
+            disclaimer: "ℹ️ U-Meddy ulinganisa namaphepha agunyaziwe we-SAHPRA PIL. Uma izimpawu ziba zimbi, sebengela ku-RecoMed udokotela.",
+            recomedTitle: "🏥 Udinga Ukunakekelwa Kwezokwelapha? (RecoMed)",
+            recomedDesc: "Uma izimpawu ziyaqhubeka noma ziba zimbi, bhukha udokotela eduze nawe ku-RecoMed.",
+            recomedFindBtn: "🔍 Thola Odokotela Eduze Nawe ku-RecoMed ›",
+            pilLink: "📄 SAHPRA Iphepha Solwazi Elivunyelwe (PDF)",
+            dosePrompt: "-- Khetha Iminyaka Yengane --",
+            doseOpt1: "Izinyanga ezi-3 kuya kunyaka o-1 (2,5 mL - 5 mL)",
+            doseOpt2: "Iminyaka e-1 kuya kweyisi-5 (5 mL - 10 mL)",
+            doseOpt3: "Iminyaka eyisi-6 kuya kweyimi-12 (10 mL - 20 mL)",
+            doseDefaultRes: "Khetha iminyaka ukubona umthamo ovunyelwe",
+            doseResPrefix: "Umthamo Ovunyelwe: Nika ",
+            doseResSuffix: " ngomlomo njalo ngamahora amane uma kudingeka (Izinga eliphakeme imithamo e-4 emahoreni angama-24). Ungangqithi izinsuku ezi-5.",
+            
+            allergexDosePrompt: "-- Khetha Iminyaka Nesisindo --",
+            allergexOpt1: "Iminyaka e-2 kuya kweyisi-12 (Ngaphansi kuka-30 kg): 5 mL kanye ngosuku",
+            allergexOpt2: "Iminyaka e-2 kuya kweyisi-12 (Ngaphezu kuka-30 kg): 10 mL kanye ngosuku",
+            allergexOpt3: "Abantu abadala nezingane ezineminyaka engu-12+: 10 mL kanye ngosuku",
+
+            triageMsg: "🚨 <strong>Kudingeka Udokotela Ngokushesha:</strong> Uma izimpawu ziba zimbi, yakha ukubonana nadokotela ku-RecoMed ngezansi:",
+            defaultBotMsg: "🤖 U-Meddy uqinisekise ulwazi lwe-PIL lwe-<b>{product}</b> ngokuphathelene ne-\"{query}\". Xhumana nadokotela njalo."
+        },
+        af: {
+            caregiverBtn: "👨‍👩‍👧 Versorger Aansig",
+            infoZoneBtn: "💡 Inligtings sone",
+            listenMeddy: "Luister na Meddy",
+            stopMeddy: "Stop Meddy se Spraak",
+            chatPlaceholder: "Vra vir Meddy of tik simptome...",
+            disclaimer: "ℹ️ Meddy vul die SAHPRA-goedgekeurde pasiëntvoubiljet aan. Vir ernstige simptome, skakel oor na RecoMed vir 'n dokter.",
+            recomedTitle: "🏥 Benodig jy Mediese Sorg? (RecoMed)",
+            recomedDesc: "As simptome voortduur of vererger, bespreek 'n aanlyn of persoonlike konsultasie met 'n dokter via RecoMed.",
+            recomedFindBtn: "🔍 Vind Dokters Naby Jou op RecoMed ›",
+            pilLink: "📄 SAHPRA Goedgekeurde Pasiëntvoubiljet (PDF)",
+            dosePrompt: "-- Kies Kind se Ouderdom --",
+            doseOpt1: "3 maande tot 1 jaar (2,5 mL - 5 mL)",
+            doseOpt2: "1 tot 5 jaar (5 mL - 10 mL)",
+            doseOpt3: "6 tot 12 jaar (10 mL - 20 mL)",
+            doseDefaultRes: "Kies ouderdomsgroep om goedgekeurde dosis te sien",
+            doseResPrefix: "Goedgekeurde Dosis: Gee ",
+            doseResSuffix: " mondelings elke 4 uur indien nodig (Maksimum 4 dosisse per 24 uur). Moenie 5 dae oorskry nie.",
+            
+            allergexDosePrompt: "-- Kies Ouderdom / Gewig --",
+            allergexOpt1: "2 tot 12 jaar (Gewig onder 30 kg): 5 mL een keer per dag",
+            allergexOpt2: "2 tot 12 jaar (Gewig oor 30 kg): 10 mL een keer per dag",
+            allergexOpt3: "Volwassenes & Kinders 12+ jaar: 10 mL een keer per dag",
+
+            triageMsg: "🚨 <strong>Mediese Aandag Aanbeveel:</strong> As simptome ernstig is, raadpleeg asseblief onmiddellik 'n dokter via <strong>RecoMed</strong> hieronder:",
+            defaultBotMsg: "🤖 Meddy het <b>{product}</b> se voubiljet inligting geverifieer rakende \"{query}\". Raadpleeg altyd jou dokter."
+        }
+    };
+
+    function openPilDocument(productKey) {
+        const localPanado = encodeURIComponent("PIL-2025739-Panado-Strawberry_TG (1).pdf");
+        const localAllergex = encodeURIComponent("ALLERGEX-NON-DROWSY-SYRUP-360008-0008-1.3.2-PIL-Approved.pdf");
+        
+        const webPanado = "https://www.adcock.com/Content/pdf/Panado_Paediatric_Syrup_Alcohol_Free_Strawberry_Flavour.pdf";
+        const webAllergex = "https://www.adcock.com/Content/pdf/Allergex_Non_Drowsy_Syrup.pdf";
+
+        const targetLocal = productKey === 'PANADO' ? localPanado : localAllergex;
+        const targetWeb = productKey === 'PANADO' ? webPanado : webAllergex;
+
+        const win = window.open(targetLocal, '_blank');
+        if (!win || win.closed || typeof win.closed == 'undefined') {
+            window.open(targetWeb, '_blank');
+        }
+    }
+
+    function getRecomedCardTemplate(lang) {
+        const u = uiTranslations[lang] || uiTranslations.en;
+        return `
+            <div class="info-card-title" style="color: #00a87e;">${u.recomedTitle}</div>
+            <p style="font-size: 12px; line-height: 1.4; color: #334155;">${u.recomedDesc}</p>
+            <div class="recomed-grid">
+                <a href="https://www.recomed.co.za/general-practitioner/" target="_blank" class="recomed-chip"><span style="font-size:16px;">🩺</span><span>General Practitioner</span></a>
+                <a href="https://www.recomed.co.za/" target="_blank" class="recomed-chip"><span style="font-size:16px;">💻</span><span>Virtual Consult</span></a>
+                <a href="https://www.recomed.co.za/" target="_blank" class="recomed-chip"><span style="font-size:16px;">🏥</span><span>Clinic / Pharmacy</span></a>
+                <a href="https://www.recomed.co.za/" target="_blank" class="recomed-chip"><span style="font-size:16px;">🤢</span><span>Stomach Bug</span></a>
+                <a href="https://www.recomed.co.za/" target="_blank" class="recomed-chip"><span style="font-size:16px;">📄</span><span>Sick Note</span></a>
+                <a href="https://www.recomed.co.za/dentist/" target="_blank" class="recomed-chip"><span style="font-size:16px;">🦷</span><span>Dentist</span></a>
+            </div>
+            <a class="recomed-btn" href="https://www.recomed.co.za/" target="_blank" rel="noopener">${u.recomedFindBtn}</a>
+        `;
+    }
+
+    // VISUAL DRAWINGS & MINI-ILLUSTRATIONS FOR DO'S & DON'TS
+    const visualPosterData = {
+        PANADO: {
+            en: {
+                header: "Panado® Paediatric Strawberry Safety Poster",
+                dos: [
+                    { icon: "🧪", text: "Shake the bottle thoroughly before measuring dose." },
+                    { icon: "🥄", text: "Measure exact dose (2,5 mL to 20 mL) using metric syringe." },
+                    { icon: "⏱️", text: "Wait at least 4 hours between each dose." },
+                    { icon: "💧", text: "Keep child hydrated with plenty of water and fluids." }
+                ],
+                donts: [
+                    { icon: "🚫", text: "Do NOT give more than 4 doses in 24 hours." },
+                    { icon: "🥄❌", text: "Do NOT use household tea or table spoons." },
+                    { icon: "💊⚠️", text: "Do NOT combine with other Paracetamol products." },
+                    { icon: "🩺", text: "Do NOT give for longer than 5 days without a GP." }
+                ]
+            },
+            zu: {
+                header: "Isimemezelo Se-Panado® Paediatric Strawberry",
+                dos: [
+                    { icon: "🧪", text: "Gcolisa ibhotela kahle ngaphambi kokulinganisa." },
+                    { icon: "🥄", text: "Linganisa umthamo oqondile ngesiringi yomlomo." },
+                    { icon: "⏱️", text: "Linda amahora amane phakathi kwemithamo." },
+                    { icon: "💧", text: "Gcina ingane inamanzi anele emzimbeni." }
+                ],
+                donts: [
+                    { icon: "🚫", text: "UNGANIKI imithamo engaphezu kwemine ngosuku." },
+                    { icon: "🥄❌", text: "UNGASEBENZISI izipuni zasekhishini." },
+                    { icon: "💊⚠️", text: "UNGAHLANGANISI neminye imikhiqizo ene-paracetamol." },
+                    { icon: "🩺", text: "UNGANIKI ngaphezu kwezinsuku ezi-5 ngaphandle kukadokotela." }
+                ]
+            },
+            af: {
+                header: "Panado® Paediatric Strawberry Veiligheidsplakkaat",
+                dos: [
+                    { icon: "🧪", text: "Skud die bottel deeglik voor meting." },
+                    { icon: "🥄", text: "Meet presiese dosis met 'n metriese spuit." },
+                    { icon: "⏱️", text: "Wag ten minste 4 uur tussen dosisse." },
+                    { icon: "💧", text: "Hou die kind goed gehidreer met vloeistowwe." }
+                ],
+                donts: [
+                    { icon: "🚫", text: "Moenie meer as 4 dosisse per 24 uur gee nie." },
+                    { icon: "🥄❌", text: "Moenie huishoudelike teelepels gebruik nie." },
+                    { icon: "💊⚠️", text: "Moenie kombineer met ander parasetamol produkte nie." },
+                    { icon: "🩺", text: "Moenie langer as 5 dae gee sonder 'n dokter nie." }
+                ]
+            }
+        },
+        ALLERGEX: {
+            en: {
+                header: "Allergex® Non Drowsy Syrup Safety Poster",
+                dos: [
+                    { icon: "📅", text: "Take strictly ONCE DAILY for allergy relief." },
+                    { icon: "🍲", text: "May be taken with or without food." },
+                    { icon: "❄️", text: "Store below 25°C protected from direct light." },
+                    { icon: "📄", text: "Follow age/weight limits (2+ years of age)." }
+                ],
+                donts: [
+                    { icon: "🚼❌", text: "Do NOT give to toddlers under 2 years of age." },
+                    { icon: "📆❌", text: "Do NOT take for longer than 14 days without a GP." },
+                    { icon: "⚠️", text: "Do NOT give if allergic to Loratadine." },
+                    { icon: "💊❌", text: "Do NOT double up on missed doses." }
+                ]
+            },
+            zu: {
+                header: "Isimemezelo Se-Allergex® Non Drowsy Syrup",
+                dos: [
+                    { icon: "📅", text: "Thatha KANYE NGOSUKU kuphela." },
+                    { icon: "🍲", text: "Kungathathwa nokudla noma ngaphandle kokudla." },
+                    { icon: "❄️", text: "Gcina ngaphansi kuka-25°C ebumnyameni." },
+                    { icon: "📄", text: "Olanela iminyaka yobudala (2+ iminyaka)." }
+                ],
+                donts: [
+                    { icon: "🚼❌", text: "UNGANIKI ezinganeni ezingaphansi kweminyaka eyi-2." },
+                    { icon: "📆❌", text: "UNGATHATHI ngaphezu kwezinsuku ezi-14." },
+                    { icon: "⚠️", text: "UNGANIKI uma ezozwani ne-Loratadine." },
+                    { icon: "💊❌", text: "UNGAHLELISI imithamo eyi-double." }
+                ]
+            },
+            af: {
+                header: "Allergex® Non Drowsy Syrup Veiligheidsplakkaat",
+                dos: [
+                    { icon: "📅", text: "Neem streng EEN KEER PER DAG." },
+                    { icon: "🍲", text: "Kan saam met of sonder kos geneem word." },
+                    { icon: "❄️", text: "Bêre onder 25°C beskerm teen lig." },
+                    { icon: "📄", text: "Voldoen aan ouderdomsbeperkings (2+ jaar)." }
+                ],
+                donts: [
+                    { icon: "🚼❌", text: "Moenie vir kinders onder 2 jaar gee nie." },
+                    { icon: "📆❌", text: "Moenie langer as 14 dae neem sonder dokter nie." },
+                    { icon: "⚠️", text: "Moenie gee as allergies vir Loratadine nie." },
+                    { icon: "💊❌", text: "Moenie 'n dubbele dosis neem vir 'n vergete dosis nie." }
+                ]
+            }
+        }
+    };
+
+    function renderPosterHtml(productKey, lang) {
+        const p = visualPosterData[productKey][lang] || visualPosterData[productKey]['en'];
+        const u = uiTranslations[lang] || uiTranslations.en;
+
+        const dosCards = p.dos.map(d => `
+            <div class="visual-card card-do">
+                <div class="visual-icon-badge icon-badge-do">${d.icon}</div>
+                <div class="visual-card-text">${d.text}</div>
+            </div>
+        `).join('');
+
+        const dontsCards = p.donts.map(d => `
+            <div class="visual-card card-dont">
+                <div class="visual-icon-badge icon-badge-dont">${d.icon}</div>
+                <div class="visual-card-text">${d.text}</div>
+            </div>
+        `).join('');
+
+        return `
+            <div class="poster-container">
+                <div class="poster-header">${p.header}</div>
+                
+                <div class="visual-section-title title-dos-bg"><span>✔</span> DO'S (INSTRUCTIONS)</div>
+                <div class="visual-grid">${dosCards}</div>
+
+                <div class="visual-section-title title-donts-bg"><span>✖</span> DON'TS (WARNINGS)</div>
+                <div class="visual-grid">${dontsCards}</div>
+            </div>
+            <button class="pil-link-btn" onclick="openPilDocument('${productKey}')">${u.pilLink}</button>
+        `;
+    }
+
+    const translations = {
+        PANADO: {
+            en: {
+                f2_speech: "👋 You scanned <strong>Panado® Paediatric Syrup Strawberry</strong> (S0). Each 5 mL contains Paracetamol 120 mg. Sugar-free and Tartrazine-free.",
+                f3_speech: "🥄 <strong>Dosage Calculator:</strong> Dosage depends on age bracket (3 mos to 12 yrs). Repeat every 4 hours as needed (Max 4 doses in 24 hrs).",
+                f4_speech: "⏱️ <strong>Overdose & Duration Warning:</strong> Contains Paracetamol which may be fatal in overdose. Do NOT give for longer than 5 days without consulting a doctor.",
+                f5_speech: "❄️ <strong>Storage Instructions:</strong> Store at or below 25°C protected from light in well-closed container. Do not refrigerate or freeze. Keep out of reach of children.",
+                f6_speech: "🩺 <strong>Need a Doctor?</strong> If pain/fever symptoms worsen or do not improve after 5 days, use RecoMed to consult a GP.",
+
+                tab_f2: "Overview (S0)",
+                tab_f3: "Dosage Calculator",
+                tab_f4: "Warnings & Duration",
+                tab_f5: "Storage & Safety",
+                tab_f6: "🏥 Find a Doctor",
+
+                overviewCard: `<div class="info-card-title">1. What Panado Paediatric Strawberry is and what it is used for</div>
+                               <p style="font-size:12px; line-height:1.4;">Active ingredient <strong>Paracetamol (120 mg/5 mL)</strong> acts as an analgesic (pain reliever) and antipyretic (reduces fever). Used for symptomatic treatment of mild to moderate pain and fever. Contains sodium cyclamate & sorbitol. Sugar free & Tartrazine free.</p>`,
+                warningCard: `<div class="info-card-title">4. Warnings & Duration Limits</div>
+                              <p style="font-size:12px; line-height:1.4; color:#b91c1c;"><strong>⚠️ Severe Overdose Warning:</strong> Contains paracetamol which may be fatal in overdose. In suspected overdose, contact a doctor or Poison Centre immediately. Do not use continuously for more than 10 days, and consult a doctor if fever/pain symptoms persist beyond 5 days.</p>`,
+                storageCard: `<div class="info-card-title">5. How to store Panado Paediatric Syrup Strawberry</div>
+                             <p style="font-size:12px; line-height:1.4;">Store in well closed container protected from light at or below 25°C. Do not refrigerate or freeze. Do not store in a bathroom. Return all unused medicine to your pharmacist.</p>`,
+
+                qa_fever: "🌡️ Panado treats fever and mild-to-moderate pain. Give the recommended dose every 4 hours as needed. Consult a doctor if fever lasts longer than 5 days.",
+                qa_dose: "⚖️ Approved Dosing (Oral): 3–12 mos (2,5–5 mL), 1–5 yrs (5–10 mL), 6–12 yrs (10–20 mL). Max 4 doses in 24 hours.",
+                qa_pil: "📄 Click below to open the official SAHPRA approved Panado Paediatric Syrup Strawberry Patient Information Leaflet!"
+            },
+            zu: {
+                f2_speech: "👋 Uskani <strong>Panado® Paediatric Syrup Strawberry</strong> (S0). Incxenye ngayinye ye-5 mL inetshukela ene-Paracetamol 120 mg. Aina shukela ne-Tartrazine.",
+                f3_speech: "🥄 <strong>Umhlahlandlela Womthamo:</strong> Umthamo unqunywa ngokobudala. Phinda ngemuva kwamahora ayi-4 (Izinga eliphakeme imithamo e-4 emahoreni angama-24).",
+                f4_speech: "⏱️ <strong>Isexwayiso Se-Overdose:</strong> Ine-Paracetamol engaba yingozi kakhulu uma uthatha eningi. Unganiki ngaphezu kwezinsuku ezi-5 ngaphandle kukadokotela.",
+                f5_speech: "❄️ <strong>Ukugcina Umuthi:</strong> Gcina ngaphansi kuka-25°C ebumnyameni. Ungafiki efrijini. Gcina kude nezingane.",
+                f6_speech: "🩺 <strong>Udinga Udokotela?</strong> Uma izimpawu ziyaqhubeka emuva kwezinsuku ezi-5, sebenzisa u-RecoMed ukuthola udokotela.",
+
+                tab_f2: "Isifinyezo (S0)",
+                tab_f3: "I-Calculator Yomthamo",
+                tab_f4: "Izixwayiso No-5 Days",
+                tab_f5: "Ukugcina Umuthi",
+                tab_f6: "🏥 Thola Udokotela",
+
+                overviewCard: `<div class="info-card-title">1. Usetshenziswa yini lo muthi?</div><p style="font-size:12px; line-height:1.4;">I-Paracetamol (120 mg/5 mL) yokwelapha umkhuhlane nobuhlungu obuncane ezinganeni. Ayinashukela (Sugar free) nemibala ye-Tartrazine.</p>`,
+                warningCard: `<div class="info-card-title">4. Izixwayiso Zokuphepha</div><p style="font-size:12px; line-height:1.4; color:#b91c1c;"><strong>⚠️ Isexwayiso Se-Overdose Paracetamol:</strong> Ine-paracetamol engalimaza isibindi ngokudlulele. Bonana nadokotela uma izimpawu zengane zingcono emva kwezinsuku ezi-5.</p>`,
+                storageCard: `<div class="info-card-title">5. Ukugcina Umuthi</div><p style="font-size:12px; line-height:1.4;">Gcina ebhokisini ezingeni lokushisa elingaphansi kuka-25°C. Ungafiki efrijini ekhaya.</p>`,
+
+                qa_fever: "🌡️ I-Panado welapha umkhuhlane. Nika umthamo kusebenza njalo ngamahora e-4. Bonana nadokotela emva kwezinsuku ezi-5.",
+                qa_dose: "⚖️ Umthamo Ovunyelwe: Izinyanga 3–12 (2,5–5 mL), Iminyaka 1–5 (5–10 mL), Iminyaka 6–12 (10–20 mL). Max imithamo e-4 ngosuku.",
+                qa_pil: "📄 Ungavula iphepha solwazi lwe-SAHPRA lwe-Panado Strawberry ngezansi!"
+            },
+            af: {
+                f2_speech: "👋 Jy het <strong>Panado® Paediatric Syrup Strawberry</strong> (S0) geskandeer. Bevat Parasetamol 120 mg/5 mL. Suikervry en Tartrasienvry.",
+                f3_speech: "🥄 <strong>Doserings rekenaar:</strong> Dosis is gebaseer op ouderdom (3 maande tot 12 jaar). Herhaal elke 4 uur (Maks 4 dosisse per 24 uur).",
+                f4_speech: "⏱️ <strong>Waarskuwing:</strong> Bevat Parasetamol wat dodelik kan wees in oordosis. Moenie langer as 5 dae gee sonder 'n dokter nie.",
+                f5_speech: "❄️ <strong>Berging:</strong> Bêre by of onder 25°C beskerm teen lig. Moenie verkoel of vries nie. Hou buite bereik van kinders.",
+                f6_speech: "🩺 <strong>Het jy 'n Dokter Nodig?</strong> As simptome voortduur na 5 dae, gebruik RecoMed om 'n dokter te vind.",
+
+                tab_f2: "Oorsig (S0)",
+                tab_f3: "Doseringsrekenaar",
+                tab_f4: "Waarskuwings & Limiete",
+                tab_f5: "Berging & Veiligheid",
+                tab_f6: "🏥 Vind 'n Dokter",
+
+                overviewCard: `<div class="info-card-title">1. Waarvoor word hierdie medisyne gebruik?</div><p style="font-size:12px; line-height:1.4;">Bestanddeel <strong>Parasetamol (120 mg/5 mL)</strong> verlig pyn en koors. Suikervry en Tartrasienvry.</p>`,
+                warningCard: `<div class="info-card-title">4. Waarskuwings</div><p style="font-size:12px; line-height:1.4; color:#b91c1c;"><strong>⚠️ Oordosis Waarskuwing:</strong> Bevat parasetamol wat ernstige lewerskade kan veroorsaak. Raadpleeg 'n dokter as simptome langer as 5 dae duur.</p>`,
+                storageCard: `<div class="info-card-title">5. Bêre-instruksies</div><p style="font-size:12px; line-height:1.4;">Bêre by of onder 25°C beskerm teen lig. Moenie verkoel of vries nie.</p>`,
+
+                qa_fever: "🌡️ Panado behandel koors en pyn. Gee elke 4 uur indien nodig. Raadpleeg 'n dokter na 5 dae.",
+                qa_dose: "⚖️ Dosis: 3–12 maande (2,5–5 mL), 1–5 jaar (5–10 mL), 6–12 jaar (10–20 mL). Maksimum 4 dosisse per 24 uur.",
+                qa_pil: "📄 Klik hieronder om die amptelike SAHPRA goedgekeurde Panado Strawberry voubiljet oop te maak!"
+            }
+        },
+
+        ALLERGEX: {
+            en: {
+                f2_speech: "👋 You scanned <strong>Allergex® Non Drowsy Syrup</strong> (S1). Active substance per 5 mL is Loratadine 5 mg. Non-drowsy antihistamine with peach odour.",
+                f3_speech: "🥄 <strong>Dosage Guide:</strong> Given ONCE DAILY. Adults & Kids 12+: 10 mL once daily. Kids 2–12 yrs (<30 kg): 5 mL once daily. Kids 2–12 yrs (>30 kg): 10 mL once daily.",
+                f4_speech: "⏱️ <strong>Duration & Precautions:</strong> Do NOT give to children under 2 years. Do NOT take for longer than 14 days without a doctor's advice.",
+                f5_speech: "🩺 <strong>Need Clinical Advice?</strong> If allergy symptoms persist beyond 14 days, consult a healthcare provider via RecoMed.",
+
+                tab_f2: "Overview (S1 Non-Drowsy)",
+                tab_f3: "Once-Daily Dosage",
+                tab_f4: "14-Day Limit & Precautions",
+                tab_f5: "🏥 Find a Doctor",
+
+                overviewCard: `<div class="info-card-title">1. What Allergex Non Drowsy Syrup is and what it is used for</div>
+                               <p style="font-size:12px; line-height:1.4;">Active substance per 5 mL is <strong>Loratadine (micronised) 5 mg</strong>. It belongs to a class of medicines called antihistamines. Used for relief of symptoms associated with allergic rhinitis (e.g., sneezing, runny nose, itching) and chronic urticaria (hives). Clear, colourless solution with peach odour.</p>`,
+                dosageCard: `<div class="info-card-title">3. How to take Allergex Non Drowsy Syrup</div>
+                             <p style="font-size:12px; line-height:1.4;"><strong>Administration:</strong> Take once daily with or without food. Recommended for adults and children older than 2 years of age.</p>`,
+                drowsyCard: `<div class="info-card-title">2 & 3. Duration Limits & Safety Precautions</div>
+                            <p style="font-size:12px; line-height:1.4; color:#b91c1c;"><strong>🚫 Age & Duration Restrictions:</strong> Not recommended for children under 2 years of age. Do not take for longer than 14 days without consulting a doctor. Contains sucrose (1 000 mg/5 mL) and sodium benzoate.</p>`,
+
+                qa_sleep: "🌼 Allergex Non Drowsy Syrup contains Loratadine, a non-drowsy antihistamine that typically does not cause sleepiness at recommended doses.",
+                qa_under2: "🚫 Allergex Non Drowsy Syrup is NOT recommended for children under 2 years of age.",
+                qa_pil: "📄 Click below to open the official SAHPRA approved Allergex Non Drowsy Syrup Patient Information Leaflet!"
+            },
+            zu: {
+                f2_speech: "👋 Uskani <strong>Allergex® Non Drowsy Syrup</strong> (S1). I-5 mL iyinikeza i-Loratadine 5 mg. Anti-allergy engalethi ubuthongo.",
+                f3_speech: "🥄 <strong>Umthamo Wakanye Ngosuku:</strong> Nika KANYE NGOSUKU. Abadala: 10 mL. Izingane (2–12 yrs, <30kg): 5 mL. Izingane (>30kg): 10 mL.",
+                f4_speech: "⏱️ <strong>Izimfanelo No-14 Days:</strong> UNGANIKI ezinganeni ezingaphansi kweminyaka eyi-2. UNGATHATHI ngaphezu kwezinsuku ezi-14.",
+                f5_speech: "🩺 <strong>Ufuna Udokotela Ngokushesha?</strong> Uma izimpawu zokungezwani nomzimba ziqhubeka emva kwezinsuku ezi-14, sebenzisa u-RecoMed.",
+
+                tab_f2: "Isifinyezo (S1 Non-Drowsy)",
+                tab_f3: "Umthamo Wakanye Ngosuku",
+                tab_f4: "Umkhawulo Wezinsuku ezi-14",
+                tab_f5: "🏥 Thola Udokotela",
+
+                overviewCard: `<div class="info-card-title">1. Usetshenziselwa Yini U-Allergex Non Drowsy Syrup?</div><p style="font-size:12px; line-height:1.4;">Ine-<strong>Loratadine 5 mg/5 mL</strong>. Imukha iphitshi (peach odour). Iwelapha i-allergic rhinitis, ukusanhlanhlatha nezilonda zesikhumba eziyisishiso.</p>`,
+                dosageCard: `<div class="info-card-title">3. Umthamo Ovunyelwe</div><p style="font-size:12px; line-height:1.4;">Thatha <strong>KANYE NGOSUKU</strong> nokudla noma ngaphandle kokudla.</p>`,
+                drowsyCard: `<div class="info-card-title">2. Umkhawulo Wosuku No-14 Days</div><p style="font-size:12px; line-height:1.4; color:#b91c1c;"><strong>🚫 Akunconywa ezinganeni ezingaphansi kweminyaka eyi-2.</strong> Ungasebenzisi ngaphezu kwezinsuku ezi-14 ngaphandle kukadokotela.</p>`,
+
+                qa_sleep: "🌼 I-Allergex Non Drowsy Syrup ine-Loratadine engalethi ubuthongo ezingeni elijwayelekile.",
+                qa_under2: "🚫 I-Allergex Non Drowsy Syrup AKUNCONYWA ezinganeni ezingaphansi kweminyaka eyi-2.",
+                qa_pil: "📄 Ungavula iphepha solwazi lwe-SAHPRA lwe-Allergex Non Drowsy ngezansi!"
+            },
+            af: {
+                f2_speech: "👋 Jy het <strong>Allergex® Non Drowsy Syrup</strong> (S1) geskandeer. Bevat Loratadine 5 mg/5 mL. Nie-lomerige antihistamien met perske-geur.",
+                f3_speech: "🥄 <strong>Een keer per dag dosis:</strong> Neem EEN KEER PER DAG. Volwassenes: 10 mL. Kinders 2–12 jaar (<30kg): 5 mL. Kinders (>30kg): 10 mL.",
+                f4_speech: "⏱️ <strong>Beperkings:</strong> Moenie vir kinders onder 2 jaar gee nie. Moenie langer as 14 dae gebruik sonder 'n dokter nie.",
+                f5_speech: "🩺 <strong>Het jy 'n Dokter Nodig?</strong> As allergieë langer as 14 dae duur, bespreek 'n dokter via RecoMed.",
+
+                tab_f2: "Oorsig (S1 Nie-Lomerig)",
+                tab_f3: "Een Keer Per Dag Dosis",
+                tab_f4: "14-Dae Beperking",
+                tab_f5: "🏥 Vind 'n Dokter",
+
+                overviewCard: `<div class="info-card-title">1. Waarvoor word Allergex Non Drowsy Syrup gebruik?</div><p style="font-size:12px; line-height:1.4;">Bevat <strong>Loratadine 5 mg/5 mL</strong>. Verlig allergieë, neusverstopping en jeukerige uitslae sonder om lomerigheid te veroorsaak.</p>`,
+                dosageCard: `<div class="info-card-title">3. Hoe om dit te neem</div><p style="font-size:12px; line-height:1.4;">Neem <strong>EEN KEER PER DAG</strong> saam met of sonder kos.</p>`,
+                drowsyCard: `<div class="info-card-title">2. Veiligheid & Limiete</div><p style="font-size:12px; line-height:1.4; color:#b91c1c;"><strong>🚫 Nie vir kinders onder 2 jaar nie.</strong> Moenie langer as 14 dae gebruik sonder mediese advies nie.</p>`,
+
+                qa_sleep: "🌼 Allergex Non Drowsy Syrup bevat Loratadine, wat nie lomerigheid veroorsaak nie.",
+                qa_under2: "🚫 Allergex Non Drowsy Syrup word nie vir kinders onder 2 jaar aanbeveel nie.",
+                qa_pil: "📄 Klik hieronder om die amptelike SAHPRA goedgekeurde Allergex Non Drowsy voubiljet oop te maak!"
+            }
+        }
+    };
+
+    function renderDoseCalcHtml(lang) {
+        const u = uiTranslations[lang] || uiTranslations.en;
+
+        if (activeProductKey === 'PANADO') {
+            return `
+                <div class="info-card-title">2. Approved Age & Dosage Calculator</div>
+                <div class="dose-calc-box">
+                    <select class="dose-select" id="doseWeightSelect" onchange="calculatePanadoDose()">
+                        <option value="">${u.dosePrompt}</option>
+                        <option value="infant">${u.doseOpt1}</option>
+                        <option value="child1">${u.doseOpt2}</option>
+                        <option value="child2">${u.doseOpt3}</option>
+                    </select>
+                    <div class="dose-result" id="doseResultText">${u.doseDefaultRes}</div>
+                </div>
+                <button class="pil-link-btn" onclick="openPilDocument('PANADO')">${u.pilLink}</button>
+            `;
+        } else {
+            return `
+                <div class="info-card-title">3. Approved Once-Daily Dosage Guide</div>
+                <div class="dose-calc-box">
+                    <select class="dose-select" id="doseWeightSelect" onchange="calculateAllergexDose()">
+                        <option value="">${u.allergexDosePrompt}</option>
+                        <option value="child_light">${u.allergexOpt1}</option>
+                        <option value="child_heavy">${u.allergexOpt2}</option>
+                        <option value="adult">${u.allergexOpt3}</option>
+                    </select>
+                    <div class="dose-result" id="doseResultText">${u.doseDefaultRes}</div>
+                </div>
+                <button class="pil-link-btn" onclick="openPilDocument('ALLERGEX')">${u.pilLink}</button>
+            `;
+        }
+    }
+
+    const productCatalogue = {
+        PANADO: {
+            brandName: "Panado® Paediatric Strawberry",
+            subtitle: "Adcock Ingram - Paracetamol 120mg/5ml (S0)",
+            themeColor: "#00bcd4",
+            themeGradient: "linear-gradient(135deg, #00d2ff 0%, #008a9a 100%)",
+            capColor: "#00BCD4",
+            bandColor: "#008A9A",
+            
+            caregiverFeatures: [
+                { id: "f2", speechKey: "f2_speech", cardKey: "overviewCard" },
+                { id: "f3", speechKey: "f3_speech", isDoseCalc: true },
+                { id: "f4", speechKey: "f4_speech", cardKey: "warningCard" },
+                { id: "f5", speechKey: "f5_speech", cardKey: "storageCard" },
+                { id: "f6", speechKey: "f6_speech", isRecomed: true }
+            ],
+
+            childFeatures: [
+                { 
+                    id: "f1", 
+                    title: "⚡ Quick Do's & Don'ts", 
+                    speechKey: "f1_speech", 
+                    isPoster: true 
+                },
+                {
+                    title: "🎥 How To Take Panado Paediatric Syrup",
+                    speech: "🌟 Hi there! Watch this fun video to see how tiny helper superheroes inside medicine fight off fever to make you feel better!",
+                    card: `<div class="child-badge">⭐ Educational Video</div>
+                           <p style="font-size:12px; font-weight:600; margin-bottom:6px;">How does your body process medicine?</p>
+                           <div class="video-container">
+                               <iframe src="https://www.youtube-nocookie.com/embed/dbl1OrVXeeQ?playsinline=1&rel=0" title="How Medicine Works" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen playsinline></iframe>
+                           </div>`
+                }
+            ],
+
+            qa: [
+                { key: ["fever", "temp", "fukesi", "koors"], resKey: "qa_fever" },
+                { key: ["dose", "spoon", "umthamo", "dosis"], resKey: "qa_dose" },
+                { key: ["pil", "leaflet", "pdf", "document", "iphepha", "voubiljet"], resKey: "qa_pil" }
+            ]
+        },
+
+        ALLERGEX: {
+            brandName: "Allergex® Non Drowsy Syrup",
+            subtitle: "Adcock Ingram - Loratadine 5mg/5ml (S1)",
+            themeColor: "#d97706",
+            themeGradient: "linear-gradient(135deg, #f59e0b 0%, #b45309 100%)",
+            capColor: "#f59e0b",
+            bandColor: "#b45309",
+
+            caregiverFeatures: [
+                { id: "f2", speechKey: "f2_speech", cardKey: "overviewCard" },
+                { id: "f3", speechKey: "f3_speech", isDoseCalc: true },
+                { id: "f4", speechKey: "f4_speech", cardKey: "drowsyCard" },
+                { id: "f5", speechKey: "f5_speech", isRecomed: true }
+            ],
+
+            childFeatures: [
+                { 
+                    id: "f1", 
+                    title: "⚡ Quick Do's & Don'ts", 
+                    speechKey: "f1_speech", 
+                    isPoster: true 
+                },
+                {
+                    title: "🎥 How To Administer Allergex?",
+                    speech: "🌼 Need quick a demonstration on how to take Allergex? Watch this cartoon video to know how!",
+                    card: `<div class="child-badge">🌼 Cartoon Science for Kids</div>
+                           <p style="font-size:12px; font-weight:600; margin-bottom:6px;">Why Do We Get Allergies?</p>
+                           <div class="video-container">
+                               <iframe src="https://www.youtube-nocookie.com/embed/a8RMTvMfUi4?playsinline=1&rel=0" title="Allergex Non Drowsy Syrup Administration and Cautions" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen playsinline></iframe>
+                           </div>`
+                }
+            ],
+
+            qa: [
+                { key: ["sleep", "drowsy", "ubuthongo", "lomerigheid"], resKey: "qa_sleep" },
+                { key: ["under 2", "baby", "toddler", "ingane", "2 years"], resKey: "qa_under2" },
+                { key: ["pil", "leaflet", "pdf", "document", "iphepha", "voubiljet"], resKey: "qa_pil" }
+            ]
+        }
+    };
+
+    let activeProductKey = "PANADO";
+    let currentSegment = 'caregiver'; 
+    let activeFeatureIndex = 0;
+    let selectedLang = 'en';
+    let isSpeaking = false;
+    let availableVoices = [];
+
+    function stripEmojis(str) {
+        return str.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '');
+    }
+
+    function loadVoices() {
+        if ('speechSynthesis' in window) {
+            availableVoices = window.speechSynthesis.getVoices();
+        }
+    }
+
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+    }
+
+    function getBestVoiceForLang(langCode) {
+        if (!availableVoices || availableVoices.length === 0) loadVoices();
+        const langMap = {
+            'en': ['en-ZA', 'en-GB', 'en-US', 'en'],
+            'zu': ['zu-ZA', 'zu', 'en-ZA'],
+            'af': ['af-ZA', 'af', 'nl-NL']
+        };
+        const preferredLangs = langMap[langCode] || ['en'];
+
+        for (let l of preferredLangs) {
+            let match = availableVoices.find(v => v.lang.replace('_','-').includes(l) && (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Google') || v.name.includes('Premium')));
+            if (match) return match;
+            match = availableVoices.find(v => v.lang.replace('_','-').includes(l));
+            if (match) return match;
+        }
+        return availableVoices[0] || null;
+    }
+
+    function toggleAudioSpeech() {
+        if (!('speechSynthesis' in window)) {
+            alert('Audio speech is not supported on this browser.');
+            return;
+        }
+
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            updateAudioButtonState(false);
+            return;
+        }
+
+        const rawText = document.getElementById('speechText').innerText || "";
+        if (!rawText) return;
+
+        window.speechSynthesis.cancel();
+
+        const cleanText = stripEmojis(rawText);
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        const chosenVoice = getBestVoiceForLang(selectedLang);
+
+        if (chosenVoice) {
+            utterance.voice = chosenVoice;
+            utterance.lang = chosenVoice.lang;
+        } else {
+            utterance.lang = selectedLang === 'zu' ? 'zu-ZA' : (selectedLang === 'af' ? 'af-ZA' : 'en-ZA');
+        }
+
+        utterance.rate = 0.95;
+        utterance.pitch = 1.05;
+
+        utterance.onstart = () => updateAudioButtonState(true);
+        utterance.onend = () => updateAudioButtonState(false);
+        utterance.onerror = () => updateAudioButtonState(false);
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function updateAudioButtonState(speaking) {
+        isSpeaking = speaking;
+        const u = uiTranslations[selectedLang] || uiTranslations.en;
+        const btn = document.getElementById('audioBtn');
+        const icon = document.getElementById('audioBtnIcon');
+        const text = document.getElementById('audioBtnText');
+
+        if (speaking) {
+            btn.classList.add('speaking');
+            icon.innerText = "⏹️";
+            text.innerText = u.stopMeddy;
+        } else {
+            btn.classList.remove('speaking');
+            icon.innerText = "🔊";
+            text.innerText = u.listenMeddy;
+        }
+    }
+
+    function onLanguageChange() {
+        selectedLang = document.getElementById('langSelect').value;
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            updateAudioButtonState(false);
+        }
+
+        const u = uiTranslations[selectedLang] || uiTranslations.en;
+
+        document.getElementById('segCaregiver').innerText = u.caregiverBtn;
+        document.getElementById('segChild').innerText = u.infoZoneBtn;
+        document.getElementById('audioBtnText').innerText = u.listenMeddy;
+        document.getElementById('chatInput').placeholder = u.chatPlaceholder;
+        document.getElementById('disclaimerBanner').innerText = u.disclaimer;
+
+        renderProductContext();
+    }
+
+    function initFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const productParam = urlParams.get('product');
+
+        if (productParam && productCatalogue[productParam.toUpperCase()]) {
+            activeProductKey = productParam.toUpperCase();
+        } else {
+            document.querySelector('.app-shell').innerHTML = '<div style="padding:45px 25px;text-align:center;margin:auto"><div style="font-size:50px">📱</div><h2 style="margin:18px 0">Scan your medicine QR code</h2><p style="color:#64748b;line-height:1.6">Please scan the QR code on your medicine packaging to open the correct MEDDY information.</p></div>';
+            return;
+        }
+        onLanguageChange();
+    }
+
+    function switchProduct(productKey) {
+        if (isSpeaking) window.speechSynthesis.cancel();
+        updateAudioButtonState(false);
+
+        const newUrl = window.location.pathname + '?product=' + productKey;
+        window.history.pushState({ path: newUrl }, '', newUrl);
+        activeProductKey = productKey;
+        activeFeatureIndex = 0;
+        renderProductContext();
+    }
+
+    function setSegment(seg) {
+        if (isSpeaking) window.speechSynthesis.cancel();
+        updateAudioButtonState(false);
+
+        currentSegment = seg;
+        activeFeatureIndex = 0;
+
+        document.getElementById('segCaregiver').classList.toggle('active', seg === 'caregiver');
+        document.getElementById('segChild').classList.toggle('active', seg === 'child');
+
+        document.getElementById('appFooter').style.display = seg === 'child' ? 'none' : 'flex';
+
+        renderProductContext();
+    }
+
+    function renderProductContext() {
+        const product = productCatalogue[activeProductKey];
+
+        document.documentElement.style.setProperty('--brand-theme', product.themeColor);
+        document.documentElement.style.setProperty('--brand-gradient', product.themeGradient);
+        document.getElementById('pillCap').setAttribute('fill', product.capColor);
+        document.getElementById('pillBand').setAttribute('fill', product.bandColor);
+        
+        document.getElementById('brandTitle').innerText = product.brandName;
+        document.getElementById('medTagDisplay').innerText = product.subtitle;
+
+        const featureList = currentSegment === 'caregiver' ? product.caregiverFeatures : product.childFeatures;
+        const langObj = translations[activeProductKey]?.[selectedLang] || translations[activeProductKey]['en'];
+
+        const navContainer = document.getElementById('navigationTabs');
+        navContainer.innerHTML = featureList.map((item, idx) => {
+            let titleText = "";
+            if (currentSegment === 'caregiver') {
+                titleText = langObj[`tab_${item.id}`] || item.id;
+            } else {
+                titleText = item.id === 'f1' ? (langObj['tab_f1'] || "⚡ Visual Do's & Don'ts") : item.title;
+            }
+            return `
+                <button class="feature-nav-btn ${item.isRecomed ? 'recomed-tab' : ''} ${idx === activeFeatureIndex ? 'active' : ''}" onclick="selectFeature(${idx})">
+                    ${titleText}
+                </button>
+            `;
+        }).join('');
+
+        renderFeatureContent();
+    }
+
+    function selectFeature(idx) {
+        if (isSpeaking) window.speechSynthesis.cancel();
+        updateAudioButtonState(false);
+
+        activeFeatureIndex = idx;
+        renderProductContext();
+    }
+
+    function renderFeatureContent() {
+        const product = productCatalogue[activeProductKey];
+        const featureList = currentSegment === 'caregiver' ? product.caregiverFeatures : product.childFeatures;
+        const currentItem = featureList[activeFeatureIndex] || featureList[0];
+        const u = uiTranslations[selectedLang] || uiTranslations.en;
+
+        let speechHtml = "";
+
+        if (currentItem.speechKey) {
+            const langObj = translations[activeProductKey]?.[selectedLang] || translations[activeProductKey]['en'];
+            speechHtml = langObj[currentItem.speechKey] || translations[activeProductKey]['en'][currentItem.speechKey];
+        } else {
+            speechHtml = currentItem.speech;
+        }
+
+        document.getElementById('speechText').innerHTML = speechHtml;
+
+        if (currentItem.isPoster) {
+            document.getElementById('infoCard').innerHTML = renderPosterHtml(activeProductKey, selectedLang);
+        } else if (currentItem.isDoseCalc) {
+            document.getElementById('infoCard').innerHTML = renderDoseCalcHtml(selectedLang);
+        } else if (currentItem.isRecomed) {
+            document.getElementById('infoCard').innerHTML = getRecomedCardTemplate(selectedLang);
+        } else {
+            if (currentSegment === 'caregiver' && currentItem.cardKey) {
+                const langObj = translations[activeProductKey]?.[selectedLang] || translations[activeProductKey]['en'];
+                const cardContent = langObj[currentItem.cardKey] || translations[activeProductKey]['en'][currentItem.cardKey];
+                document.getElementById('infoCard').innerHTML = cardContent + `<button class="pil-link-btn" onclick="openPilDocument('${activeProductKey}')">${u.pilLink}</button>`;
+            } else {
+                document.getElementById('infoCard').innerHTML = currentItem.card;
+            }
+        }
+    }
+
+    function calculatePanadoDose() {
+        const val = document.getElementById('doseWeightSelect').value;
+        const res = document.getElementById('doseResultText');
+        const u = uiTranslations[selectedLang] || uiTranslations.en;
+        
+        const doseTable = {
+            "infant": " 2,5 mL to 5 mL (60 mg to 120 mg) ",
+            "child1": " 5 mL to 10 mL (120 mg to 240 mg) ",
+            "child2": " 10 mL to 20 mL (240 mg to 480 mg) "
+        };
+
+        res.innerHTML = doseTable[val] ? `<strong>${u.doseResPrefix}</strong>${doseTable[val]}${u.doseResSuffix}` : u.doseDefaultRes;
+    }
+
+    function calculateAllergexDose() {
+        const val = document.getElementById('doseWeightSelect').value;
+        const res = document.getElementById('doseResultText');
+        const u = uiTranslations[selectedLang] || uiTranslations.en;
+
+        const doseTable = {
+            "child_light": " 5 mL ONCE DAILY ",
+            "child_heavy": " 10 mL ONCE DAILY ",
+            "adult": " 10 mL ONCE DAILY "
+        };
+
+        res.innerHTML = doseTable[val] ? `<strong>Approved Dose:</strong> Give${doseTable[val]} (Loratadine 5 mg/5 mL). Do not take for longer than 14 days without consulting a doctor.` : u.doseDefaultRes;
+    }
+
+    function updateQrTargetUrl() {
+        let baseUrl = document.getElementById('customHostInput').value.trim() || "https://yourname.github.io/meddy/";
+        baseUrl = baseUrl.split('?')[0];
+
+        const targetUrl = `${baseUrl}?product=${activeProductKey}`;
+        const encodedUrl = encodeURIComponent(targetUrl);
+        
+        document.getElementById('qrCodeImg').src = `https://quickchart.io/qr?text=${encodedUrl}&size=200&dark=0f172a`;
+        document.getElementById('qrLabel').innerText = `Scannable QR for ${productCatalogue[activeProductKey].brandName}`;
+        document.getElementById('qrTargetUrl').innerText = targetUrl;
+    }
+
+    function askMeddy() {
+        const input = document.getElementById('chatInput');
+        const q = input.value.toLowerCase().trim();
+        const product = productCatalogue[activeProductKey];
+        const u = uiTranslations[selectedLang] || uiTranslations.en;
+        const langObj = translations[activeProductKey]?.[selectedLang] || translations[activeProductKey]['en'];
+
+        if (!q) return;
+
+        if (isSpeaking) window.speechSynthesis.cancel();
+        updateAudioButtonState(false);
+
+        const triageKeywords = ["doctor", "gp", "recomed", "severe", "clinic", "hospital", "sick", "breath", "worse", "days", "udokotela", "iphepha"];
+        const isTriageNeeded = triageKeywords.some(k => q.includes(k));
+
+        if (isTriageNeeded) {
+            document.getElementById('speechText').innerHTML = u.triageMsg;
+            document.getElementById('infoCard').innerHTML = getRecomedCardTemplate(selectedLang);
+            input.value = '';
+            return;
+        }
+
+        let found = product.qa.find(item => item.key.some(k => q.includes(k)));
+        
+        if (found) {
+            document.getElementById('speechText').innerHTML = langObj[found.resKey] || translations[activeProductKey]['en'][found.resKey];
+        } else {
+            let defaultText = u.defaultBotMsg.replace('{product}', product.brandName).replace('{query}', input.value);
+            document.getElementById('speechText').innerHTML = defaultText;
+        }
+        input.value = '';
+    }
+
+    function handleKey(e) { if (e.key === 'Enter') askMeddy(); }
+
+    window.onload = initFromUrl;
+</script>
+
+</body>
+</html>
