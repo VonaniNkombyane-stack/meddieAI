@@ -1041,18 +1041,19 @@
         renderProductContext();
     }
 
-    function initFromUrl() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const productParam = urlParams.get('product');
+   function initFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const productParam = urlParams.get('product');
 
-        if (productParam && productCatalogue[productParam.toUpperCase()]) {
-            activeProductKey = productParam.toUpperCase();
-        } else {
-            document.querySelector('.app-shell').innerHTML = '<div style="padding:45px 25px;text-align:center;margin:auto"><div style="font-size:50px">📱</div><h2 style="margin:18px 0">Scan your medicine QR code</h2><p style="color:#64748b;line-height:1.6">Please scan the QR code on your medicine packaging to open the correct MEDDY information.</p></div>';
-            return;
-        }
-        onLanguageChange();
+    if (productParam && productCatalogue[productParam.toUpperCase()]) {
+        activeProductKey = productParam.toUpperCase();
+    } else {
+        // Default product when opened directly
+        activeProductKey = "PANADO";
     }
+
+    onLanguageChange();
+}
 
     function switchProduct(productKey) {
         if (isSpeaking) window.speechSynthesis.cancel();
