@@ -865,7 +865,7 @@
                 { 
                     id: "f1", 
                     title: "⚡ Quick Do's & Don'ts", 
-                    speech: "⚡ <strong>Quick Administration Do's & Don'ts:</strong> Here are PIL-verified safety rules for Panado® Paediatric Syrup Strawberry.", 
+                    speech: "⚡ Quick Administration Do's & Don'ts: Here are PIL-verified safety rules for Panado® Paediatric Syrup Strawberry.", 
                     isPoster: true 
                 },
                 {
@@ -1134,39 +1134,87 @@
     }
 
     function renderFeatureContent() {
-        const product = productCatalogue[activeProductKey];
-        const featureList = currentSegment === 'caregiver' ? product.caregiverFeatures : product.childFeatures;
-        const currentItem = featureList[activeFeatureIndex] || featureList[0];
-        const u = uiTranslations[selectedLang] || uiTranslations.en;
+    const product = productCatalogue[activeProductKey];
+    const featureList =
+        currentSegment === 'caregiver'
+            ? product.caregiverFeatures
+            : product.childFeatures;
 
-        let speechHtml = "";
+    const currentItem = featureList[activeFeatureIndex] || featureList[0];
+    const u = uiTranslations[selectedLang] || uiTranslations.en;
 
-        if (currentItem.speechKey) {
-            const langObj = translations[activeProductKey]?.[selectedLang] || translations[activeProductKey]['en'];
-            speechHtml = langObj[currentItem.speechKey] || translations[activeProductKey]['en'][currentItem.speechKey];
-        } else {
-            speechHtml = currentItem.speech;
-        }
+    let speechHtml = "";
 
-        document.getElementById('speechText').innerHTML = speechHtml;
-
-        if (currentItem.isPoster) {
-            document.getElementById('infoCard').innerHTML = renderPosterHtml(activeProductKey, selectedLang);
-        } else if (currentItem.isDoseCalc) {
-            document.getElementById('infoCard').innerHTML = renderDoseCalcHtml(selectedLang);
-        } else if (currentItem.isRecomed) {
-            document.getElementById('infoCard').innerHTML = getRecomedCardTemplate(selectedLang);
-        } else {
-            if (currentSegment === 'caregiver' && currentItem.cardKey) {
-                const langObj = translations[activeProductKey]?.[selectedLang] || translations[activeProductKey]['en'];
-                const cardContent = langObj[currentItem.cardKey] || translations[activeProductKey]['en'][currentItem.cardKey];
-                document.getElementById('infoCard').innerHTML = cardContent + `<button class="pil-link-btn" onclick="openPilDocument('${activeProductKey}')">${u.pilLink}</button>`;
-            } else {
-                document.getElementById('infoCard').innerHTML = currentItem.card;
-            }
-        }
+    // Direct speech text
+    if (currentItem.speech) {
+        speechHtml = currentItem.speech;
     }
 
+    // Translation-based speech
+    else if (currentItem.speechKey) {
+        const langObj =
+            translations[activeProductKey]?.[selectedLang] ||
+            translations[activeProductKey]['en'];
+
+        speechHtml =
+            langObj[currentItem.speechKey] ||
+            translations[activeProductKey]['en'][currentItem.speechKey] ||
+            "";
+    }
+
+    // Show or hide speech card
+    const speechCard = document.querySelector('.speech-card');
+
+    if (speechHtml && speechHtml.trim() !== "") {
+        speechCard.style.display = "block";
+        document.getElementById('speechText').innerHTML = speechHtml;
+    } else {
+        speechCard.style.display = "none";
+        document.getElementById('speechText').innerHTML = "";
+    }
+
+    // Render content
+    if (currentItem.isPoster) {
+
+        document.getElementById('infoCard').innerHTML =
+            renderPosterHtml(activeProductKey, selectedLang);
+
+    } else if (currentItem.isDoseCalc) {
+
+        document.getElementById('infoCard').innerHTML =
+            renderDoseCalcHtml(selectedLang);
+
+    } else if (currentItem.isRecomed) {
+
+        document.getElementById('infoCard').innerHTML =
+            getRecomedCardTemplate(selectedLang);
+
+    } else {
+
+        if (currentSegment === 'caregiver' && currentItem.cardKey) {
+
+            const langObj =
+                translations[activeProductKey]?.[selectedLang] ||
+                translations[activeProductKey]['en'];
+
+            const cardContent =
+                langObj[currentItem.cardKey] ||
+                translations[activeProductKey]['en'][currentItem.cardKey];
+
+            document.getElementById('infoCard').innerHTML =
+                cardContent +
+                `<button class="pil-link-btn" onclick="openPilDocument('${activeProductKey}')">
+                    ${u.pilLink}
+                </button>`;
+
+        } else {
+
+            document.getElementById('infoCard').innerHTML =
+                currentItem.card || "";
+
+        }
+    }
+}
     function calculatePanadoDose() {
         const val = document.getElementById('doseWeightSelect').value;
         const res = document.getElementById('doseResultText');
