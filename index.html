@@ -514,15 +514,20 @@
     };
 
     function openPilDocument(productKey) {
-    alert(productKey);
+        const localPanado = encodeURIComponent("PIL-2025739-Panado-Strawberry_TG (1).pdf");
+        const localAllergex = encodeURIComponent("ALLERGEX-NON-DROWSY-SYRUP-360008-0008-1.3.2-PIL-Approved.pdf");
+        
+        const webPanado = "https://www.adcock.com/Content/pdf/Panado_Paediatric_Syrup_Alcohol_Free_Strawberry_Flavour.pdf";
+        const webAllergex = "https://www.adcock.com/Content/pdf/Allergex_Non_Drowsy_Syrup.pdf";
 
-    const pdfs = {
-        PANADO: 'https://www.adcock.com/Content/pdf/Panado_Paediatric_Syrup_Alcohol_Free_Strawberry_Flavour.pdf',
-        ALLERGEX: 'https://www.adcock.com/Content/pdf/Allergex_Non_Drowsy_Syrup.pdf'
-    };
+        const targetLocal = productKey === 'PANADO' ? localPanado : localAllergex;
+        const targetWeb = productKey === 'PANADO' ? webPanado : webAllergex;
 
-    window.open(pdfs[productKey], '_blank');
-}
+        const win = window.open(targetLocal, '_blank');
+        if (!win || win.closed || typeof win.closed == 'undefined') {
+            window.open(targetWeb, '_blank');
+        }
+    }
 
     function getRecomedCardTemplate(lang) {
         const u = uiTranslations[lang] || uiTranslations.en;
