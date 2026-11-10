@@ -514,19 +514,15 @@
     };
 
     function openPilDocument(productKey) {
-        
-        
-        const webPanado = "https://www.adcock.com/Content/pdf/Panado_Paediatric_Syrup_Alcohol_Free_Strawberry_Flavour.pdf";
-        const webAllergex = "https://www.adcock.com/Content/pdf/Allergex_Non_Drowsy_Syrup.pdf";
+    alert(productKey);
 
-        const targetLocal = productKey === 'PANADO' ? localPanado : localAllergex;
-        const targetWeb = productKey === 'PANADO' ? webPanado : webAllergex;
+    const pdfs = {
+        PANADO: 'https://www.adcock.com/Content/pdf/Panado_Paediatric_Syrup_Alcohol_Free_Strawberry_Flavour.pdf',
+        ALLERGEX: 'https://www.adcock.com/Content/pdf/Allergex_Non_Drowsy_Syrup.pdf'
+    };
 
-        const win = window.open(targetLocal, '_blank');
-        if (!win || win.closed || typeof win.closed == 'undefined') {
-            window.open(targetWeb, '_blank');
-        }
-    }
+    window.open(pdfs[productKey], '_blank');
+}
 
     function getRecomedCardTemplate(lang) {
         const u = uiTranslations[lang] || uiTranslations.en;
